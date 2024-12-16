@@ -7,6 +7,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.net.URISyntaxException;
+
 @Component
 @AllArgsConstructor
 public class TelegramBot extends TelegramLongPollingBot
@@ -14,10 +16,12 @@ public class TelegramBot extends TelegramLongPollingBot
     private final BotConfig botConfig;
     private final static String welcomeString =
             "Привет, %1\n" +
-            "Я помогу извлечь звуковую дорожку " +
-            "с любого видео на ютубе. Вставь ссылку:";
+                    "Я помогу извлечь звуковую дорожку " +
+                    "с любого видео на ютубе. Вставь ссылку:";
     private final static String fileString =
             "Вот твоя музыка:";
+    private final static String InvalidLinkString =
+            "Не могу распознать ссылку. Попробуй ещё раз.";
 
     @Override
     public String getBotUsername()
@@ -45,7 +49,13 @@ public class TelegramBot extends TelegramLongPollingBot
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
                 default:
-                    // ToDo check link? in messageText
+
+                    if (!LinkChecker.isYouTubeVideoLink(messageText))
+                    {
+                        sendMessage(chatId, InvalidLinkString);
+                        break;
+                    }
+
                     // ToDo download or cash
                     // ToDo progressbar
                     // ToDo put file
